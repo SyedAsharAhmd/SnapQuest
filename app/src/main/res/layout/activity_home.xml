@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF"
+    android:gravity="center"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SnapQuest"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="#000000"
+        android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="48dp"
+        android:text="Daily One-Photo Challenge"
+        android:textColor="#888888"
+        android:textSize="14sp" />
+
+
+    <EditText
+        android:id="@+id/btnSearch"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:hint="🔍  Search users..."
+        android:background="@drawable/input_background"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:textColorHint="#888888"
+        android:focusable="false"
+        android:clickable="true"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/btnUploadPhoto"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:text="Upload Today's Photo"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#1A47E5"
+        android:layout_marginBottom="16dp"/>
+
+
+
+    <Button
+        android:id="@+id/btnFeed"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:text="View Feed"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#1A47E5"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/btnProfile"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:text="My Profile"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#1A47E5"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/btnLogout"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:text="Logout"
+        android:textColor="#888888"
+        android:backgroundTint="#FFFFFF"/>
+
+</LinearLayout>

@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "921166204219",
+    "firebase_url": "https://snapquest-696c1-default-rtdb.firebaseio.com",
+    "project_id": "snapquest-696c1",
+    "storage_bucket": "snapquest-696c1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:921166204219:android:948de1d39d5c739a667b1e",
+        "android_client_info": {
+          "package_name": "com.ashar.snapquest"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "921166204219-93csp9r0r77solf8nd55b5qbj8osc72v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ashar.snapquest",
+            "certificate_hash": "195a15c674dca0cd6992c32a9467a94b2aefd41b"
+          }
+        },
+        {
+          "client_id": "921166204219-fe4sbvaa2opakvknugcqagcovl9p1bjc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAuxdTupIjjYn6p7p6NtI6UgC74MVWBwZc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "921166204219-fe4sbvaa2opakvknugcqagcovl9p1bjc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
