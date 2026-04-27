@@ -3,35 +3,48 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#FFFFFF">
+    android:background="#121212">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Search"
+        android:textColor="#FFFFFF"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:paddingStart="20dp"
+        android:paddingTop="48dp"
+        android:paddingBottom="16dp"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="16dp"
-        android:paddingTop="32dp">
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:layout_marginBottom="8dp">
 
         <EditText
             android:id="@+id/etSearch"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:layout_weight="1"
             android:hint="Search users..."
             android:background="@drawable/input_background"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-            android:textColor="#000000"
-            android:textColorHint="#AAAAAA"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#555555"
             android:layout_marginEnd="8dp"/>
 
         <Button
             android:id="@+id/btnSearch"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:text="Search"
-            android:backgroundTint="#1A47E5"
-            android:textColor="#FFFFFF"/>
+            android:backgroundTint="#FFFFFF"
+            android:textColor="#000000"
+            android:textStyle="bold"/>
 
     </LinearLayout>
 

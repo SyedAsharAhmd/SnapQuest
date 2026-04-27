@@ -3,23 +3,24 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F5F5F5">
+    android:background="#121212">
 
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="90dp"
-        android:background="#FFFFFF"
-        android:gravity="center"
-        android:padding="16dp"
-        android:text="SnapQuest – Daily Feed"
-        android:textColor="#000000"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        android:layout_height="wrap_content"
+        android:text="Feed"
+        android:textColor="#FFFFFF"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:paddingStart="20dp"
+        android:paddingTop="48dp"
+        android:paddingBottom="16dp"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvFeed"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="8dp"/>
+        android:padding="8dp"
+        android:clipToPadding="false"/>
 
 </LinearLayout>

@@ -77,7 +77,8 @@ class CommentsActivity : AppCompatActivity() {
         val comment = Comment(
             username = username,
             text = text,
-            timestamp = System.currentTimeMillis()
+            timestamp = System.currentTimeMillis(),
+            userId = currentUser.uid
         )
 
         ref.setValue(comment).addOnSuccessListener {

@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity() {
         val etEmail = findViewById<EditText>(R.id.etEmail)
         val etPassword = findViewById<EditText>(R.id.etPassword)
         val btnLogin = findViewById<Button>(R.id.btnLogin)
-        val btnGoogle = findViewById<Button>(R.id.btnGoogle)
+        val btnGoogle = findViewById<android.widget.LinearLayout>(R.id.btnGoogle)
         val tvGoToSignup = findViewById<TextView>(R.id.tvGoToSignup)
 
         btnLogin.setOnClickListener {

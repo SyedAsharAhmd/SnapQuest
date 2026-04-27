@@ -14,7 +14,7 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var etSearch: EditText
     private lateinit var btnSearch: Button
     private lateinit var rvSearchResults: RecyclerView
-    private val results = mutableListOf<String>()
+    private val results = mutableListOf<Pair<String, String>>()
     private lateinit var adapter: SearchAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,19 +37,16 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun searchUsers(query: String) {
-        val ref = FirebaseDatabase.getInstance().getReference("posts")
+        val ref = FirebaseDatabase.getInstance().getReference("users")
         ref.get().addOnSuccessListener { snapshot ->
             results.clear()
-            val foundUsernames = mutableSetOf<String>()
             for (userSnapshot in snapshot.children) {
-                for (dateSnapshot in userSnapshot.children) {
-                    val username = dateSnapshot.child("username").getValue(String::class.java) ?: ""
-                    if (username.lowercase().contains(query) && username.isNotEmpty()) {
-                        foundUsernames.add(username)
-                    }
+                val userId = userSnapshot.key ?: continue
+                val username = userSnapshot.child("username").getValue(String::class.java) ?: ""
+                if (username.lowercase().contains(query) && username.isNotEmpty()) {
+                    results.add(Pair(userId, username))
                 }
             }
-            results.addAll(foundUsernames)
             adapter.notifyDataSetChanged()
             if (results.isEmpty()) {
                 Toast.makeText(this, "No users found", Toast.LENGTH_SHORT).show()

@@ -13,8 +13,36 @@ import com.google.firebase.database.FirebaseDatabase
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.work.*
+import java.util.concurrent.TimeUnit
+import java.util.Calendar
 
 class HomeActivity : AppCompatActivity() {
+
+    private fun scheduleDailyReminder() {
+        val currentTime = Calendar.getInstance()
+        val targetTime = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 20)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+        }
+
+        if (currentTime.after(targetTime)) {
+            targetTime.add(Calendar.DAY_OF_MONTH, 1)
+        }
+
+        val delay = targetTime.timeInMillis - currentTime.timeInMillis
+
+        val reminderRequest = PeriodicWorkRequestBuilder<ReminderWorker>(1, TimeUnit.DAYS)
+            .setInitialDelay(delay, TimeUnit.MILLISECONDS)
+            .build()
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "daily_reminder",
+            ExistingPeriodicWorkPolicy.KEEP,
+            reminderRequest
+        )
+    }
 
     private lateinit var auth: FirebaseAuth
 
@@ -29,13 +57,18 @@ class HomeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
+        scheduleDailyReminder()
 
         auth = FirebaseAuth.getInstance()
 
-        val btnUploadPhoto = findViewById<Button>(R.id.btnUploadPhoto)
-        val btnLogout = findViewById<Button>(R.id.btnLogout)
-        val btnFeed = findViewById<Button>(R.id.btnFeed)
-        val btnProfile = findViewById<Button>(R.id.btnProfile)
+        val btnUploadPhoto = findViewById<android.widget.LinearLayout>(R.id.btnUploadPhoto)
+        val btnLogout = findViewById<android.widget.LinearLayout>(R.id.btnLogout)
+        val btnFeed = findViewById<android.widget.LinearLayout>(R.id.btnFeed)
+        val btnProfile = findViewById<android.widget.LinearLayout>(R.id.btnProfile)
+        val btnTrending = findViewById<android.widget.LinearLayout>(R.id.btnTrending)
+        btnTrending.setOnClickListener {
+            startActivity(Intent(this, TrendingActivity::class.java))
+        }
         val btnSearch = findViewById<android.widget.EditText>(R.id.btnSearch)
         btnSearch.setOnClickListener {
             startActivity(Intent(this, SearchActivity::class.java))

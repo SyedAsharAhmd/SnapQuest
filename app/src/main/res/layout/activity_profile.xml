@@ -3,16 +3,23 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#FFFFFF">
+    android:background="#121212">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center"
-        android:padding="24dp"
-        android:paddingTop="40dp"
-        android:background="#FFFFFF">
+        android:paddingTop="48dp"
+        android:paddingBottom="24dp">
+
+        <ImageView
+            android:id="@+id/ivProfilePicture"
+            android:layout_width="88dp"
+            android:layout_height="88dp"
+            android:scaleType="centerCrop"
+            android:background="@drawable/circle_background"
+            android:layout_marginBottom="12dp"/>
 
         <TextView
             android:id="@+id/tvProfileName"
@@ -21,16 +28,15 @@
             android:text="Username"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:textColor="#000000"
+            android:textColor="#FFFFFF"
             android:layout_marginBottom="4dp"/>
-
 
         <TextView
             android:id="@+id/tvPostCount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="0 photos"
-            android:textSize="14sp"
+            android:textSize="13sp"
             android:textColor="#555555"/>
 
     </LinearLayout>
@@ -38,12 +44,13 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="#EEEEEE"/>
+        android:background="#222222"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvGallery"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="4dp"/>
+        android:padding="3dp"
+        android:clipToPadding="false"/>
 
 </LinearLayout>
