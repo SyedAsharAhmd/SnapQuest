@@ -38,30 +38,35 @@ class TrendingActivity : AppCompatActivity() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 posts.clear()
                 for (userSnapshot in snapshot.children) {
+                    val userId = userSnapshot.key ?: ""
                     val dateSnapshot = userSnapshot.child(today)
                     if (dateSnapshot.exists()) {
                         val imageUrl = dateSnapshot.child("imageUrl").getValue(String::class.java) ?: ""
-                        val userId = dateSnapshot.child("userId").getValue(String::class.java) ?: ""
-                        val username = dateSnapshot.child("username").getValue(String::class.java) ?: userId.take(8)
+                        val uid = dateSnapshot.child("userId").getValue(String::class.java) ?: ""
                         val caption = dateSnapshot.child("caption").getValue(String::class.java) ?: ""
                         val likes = dateSnapshot.child("likes").getValue(Int::class.java) ?: 0
                         val comments = dateSnapshot.child("commentCount").getValue(Int::class.java) ?: 0
 
-                        posts.add(Post(
-                            userId = userId,
-                            username = username,
-                            imageUrl = imageUrl,
-                            caption = caption,
-                            date = today,
-                            likes = likes,
-                            comments = comments
-                        ))
+                        FirebaseDatabase.getInstance().getReference("users").child(userId).get()
+                            .addOnSuccessListener { userSnap ->
+                                val username = userSnap.child("username").getValue(String::class.java) ?: uid.take(8)
+                                val profilePic = userSnap.child("profilePicture").getValue(String::class.java) ?: ""
+                                posts.add(Post(
+                                    userId = uid,
+                                    username = username,
+                                    imageUrl = imageUrl,
+                                    caption = caption,
+                                    date = today,
+                                    likes = likes,
+                                    comments = comments,
+                                    profilePicture = profilePic
+                                ))
+                                posts.sortByDescending { it.likes }
+                                adapter.notifyDataSetChanged()
+                            }
                     }
                 }
-                posts.sortByDescending { it.likes }
-                adapter.notifyDataSetChanged()
             }
-
             override fun onCancelled(error: DatabaseError) {}
         })
     }

@@ -14,7 +14,7 @@
         android:textSize="28sp"
         android:textStyle="bold"
         android:paddingStart="24dp"
-        android:paddingTop="48dp"
+        android:paddingTop="100dp"
         android:paddingBottom="4dp"/>
 
     <TextView

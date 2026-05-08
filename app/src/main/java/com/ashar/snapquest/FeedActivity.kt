@@ -28,42 +28,48 @@ class FeedActivity : AppCompatActivity() {
     }
 
     private fun loadPosts() {
-        val database = FirebaseDatabase.getInstance()
-        val ref = database.getReference("posts")
-
-        ref.addListenerForSingleValueEvent(object : ValueEventListener {            override fun onDataChange(snapshot: DataSnapshot) {
+        val ref = FirebaseDatabase.getInstance().getReference("posts")
+        ref.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
                 posts.clear()
                 for (userSnapshot in snapshot.children) {
                     val userId = userSnapshot.key ?: ""
                     for (dateSnapshot in userSnapshot.children) {
-                        val imageUrl = dateSnapshot.child("imageUrl").getValue(String::class.java) ?: ""
+                        val imageUrl =
+                            dateSnapshot.child("imageUrl").getValue(String::class.java) ?: ""
                         val uid = dateSnapshot.child("userId").getValue(String::class.java) ?: ""
-                        val caption = dateSnapshot.child("caption").getValue(String::class.java) ?: ""
+                        val caption =
+                            dateSnapshot.child("caption").getValue(String::class.java) ?: ""
                         val date = dateSnapshot.key ?: ""
-                        val username = dateSnapshot.child("username").getValue(String::class.java) ?: uid.take(8)
                         val likes = dateSnapshot.child("likes").getValue(Int::class.java) ?: 0
-                        val comments = dateSnapshot.child("commentCount").getValue(Int::class.java) ?: 0
+                        val comments =
+                            dateSnapshot.child("commentCount").getValue(Int::class.java) ?: 0
 
-                        FirebaseDatabase.getInstance().getReference("users")
-                            .child(userId).child("profilePicture").get()
-                            .addOnSuccessListener { picSnapshot ->
-                                val profilePic = picSnapshot.getValue(String::class.java) ?: ""
-                                val post = Post(
-                                    userId = uid,
-                                    username = username,
-                                    imageUrl = imageUrl,
-                                    caption = caption,
-                                    date = date,
-                                    likes = likes,
-                                    comments = comments,
-                                    profilePicture = profilePic
+                        FirebaseDatabase.getInstance().getReference("users").child(userId).get()
+                            .addOnSuccessListener { userSnapshot ->
+                                val username =
+                                    userSnapshot.child("username").getValue(String::class.java)
+                                        ?: uid.take(8)
+                                val profilePic = userSnapshot.child("profilePicture")
+                                    .getValue(String::class.java) ?: ""
+                                posts.add(
+                                    Post(
+                                        userId = uid,
+                                        username = username,
+                                        imageUrl = imageUrl,
+                                        caption = caption,
+                                        date = date,
+                                        likes = likes,
+                                        comments = comments,
+                                        profilePicture = profilePic
+                                    )
                                 )
-                                posts.add(post)
                                 adapter.notifyDataSetChanged()
                             }
                     }
                 }
             }
+
             override fun onCancelled(error: DatabaseError) {}
         })
     }

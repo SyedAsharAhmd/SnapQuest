@@ -2,13 +2,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="4dp">
+    android:padding="2dp">
 
     <ImageView
         android:id="@+id/ivGalleryImage"
         android:layout_width="match_parent"
         android:layout_height="120dp"
         android:scaleType="centerCrop"
-        android:background="#E0E0E0"/>
+        android:background="#1E1E1E"/>
 
 </LinearLayout>
