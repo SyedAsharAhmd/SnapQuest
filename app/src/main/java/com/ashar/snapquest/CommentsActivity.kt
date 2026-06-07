@@ -69,26 +69,32 @@ class CommentsActivity : AppCompatActivity() {
 
     private fun postComment(text: String) {
         val currentUser = FirebaseAuth.getInstance().currentUser ?: return
-        val username = currentUser.displayName ?: currentUser.email ?: "user"
 
-        val ref = FirebaseDatabase.getInstance().getReference("posts")
-            .child(postUserId).child(postDate).child("comments").push()
+        // fetch username from database instead of using Auth
+        FirebaseDatabase.getInstance().getReference("users")
+            .child(currentUser.uid).child("username").get()
+            .addOnSuccessListener { snapshot ->
+                val username = snapshot.getValue(String::class.java) ?: "user"
 
-        val comment = Comment(
-            username = username,
-            text = text,
-            timestamp = System.currentTimeMillis(),
-            userId = currentUser.uid
-        )
+                val ref = FirebaseDatabase.getInstance().getReference("posts")
+                    .child(postUserId).child(postDate).child("comments").push()
 
-        ref.setValue(comment).addOnSuccessListener {
-            etComment.text.clear()
-            val countRef = FirebaseDatabase.getInstance().getReference("posts")
-                .child(postUserId).child(postDate).child("commentCount")
-            countRef.get().addOnSuccessListener { snapshot ->
-                val current = snapshot.getValue(Int::class.java) ?: 0
-                countRef.setValue(current + 1)
+                val comment = Comment(
+                    username = username,
+                    text = text,
+                    timestamp = System.currentTimeMillis(),
+                    userId = currentUser.uid
+                )
+
+                ref.setValue(comment).addOnSuccessListener {
+                    etComment.text.clear()
+                    val countRef = FirebaseDatabase.getInstance().getReference("posts")
+                        .child(postUserId).child(postDate).child("commentCount")
+                    countRef.get().addOnSuccessListener { countSnapshot ->
+                        val current = countSnapshot.getValue(Int::class.java) ?: 0
+                        countRef.setValue(current + 1)
+                    }
+                }
             }
-        }
     }
 }
