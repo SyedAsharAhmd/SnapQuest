@@ -14,7 +14,7 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var etSearch: EditText
     private lateinit var btnSearch: Button
     private lateinit var rvSearchResults: RecyclerView
-    private val results = mutableListOf<Pair<String, String>>()
+    private val results = mutableListOf<Triple<String, String, String>>()
     private lateinit var adapter: SearchAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,8 +43,9 @@ class SearchActivity : AppCompatActivity() {
             for (userSnapshot in snapshot.children) {
                 val userId = userSnapshot.key ?: continue
                 val username = userSnapshot.child("username").getValue(String::class.java) ?: ""
+                val profilePicture = userSnapshot.child("profilePicture").getValue(String::class.java) ?: ""
                 if (username.lowercase().contains(query) && username.isNotEmpty()) {
-                    results.add(Pair(userId, username))
+                    results.add(Triple(userId, username, profilePicture))
                 }
             }
             adapter.notifyDataSetChanged()

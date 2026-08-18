@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
@@ -14,7 +13,9 @@ import com.google.firebase.database.FirebaseDatabase
 
 class PostAdapter(private val posts: List<Post>) :
     RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
+
     private val pendingLikes = mutableSetOf<String>()
+
     private fun sendNotification(token: String, title: String, body: String) {
         FirebaseDatabase.getInstance().getReference("notifications").push().setValue(
             mapOf(
@@ -54,12 +55,12 @@ class PostAdapter(private val posts: List<Post>) :
             .load(post.imageUrl)
             .into(holder.ivPostImage)
 
-        if (post.profilePicture.isNotEmpty()) {
-            Glide.with(holder.itemView.context)
-                .load(post.profilePicture)
-                .circleCrop()
-                .into(holder.ivUserProfilePic)
-        }
+        Glide.with(holder.itemView.context)
+            .load(post.profilePicture.ifEmpty { null })
+            .placeholder(R.drawable.default_avatar)
+            .error(R.drawable.default_avatar)
+            .circleCrop()
+            .into(holder.ivUserProfilePic)
 
         holder.tvLikes.setOnClickListener {
             val currentUser = FirebaseAuth.getInstance().currentUser ?: return@setOnClickListener
@@ -94,15 +95,19 @@ class PostAdapter(private val posts: List<Post>) :
                         post.likes = newLikes
                         holder.tvLikes.text = "♡ $newLikes"
                         pendingLikes.remove(postKey)
+
                         FirebaseDatabase.getInstance().getReference("users")
-                            .child(post.userId).child("fcmToken").get()
-                            .addOnSuccessListener { tokenSnapshot ->
-                                val token = tokenSnapshot.getValue(String::class.java)
-                                if (token != null && token != uid) {
-                                    val currentUsername = currentUser.displayName
-                                        ?: currentUser.email ?: "Someone"
-                                    sendNotification(token, "New Like!", "$currentUsername liked your photo")
-                                }
+                            .child(uid).child("username").get()
+                            .addOnSuccessListener { usernameSnapshot ->
+                                val username = usernameSnapshot.getValue(String::class.java) ?: "Someone"
+                                FirebaseDatabase.getInstance().getReference("users")
+                                    .child(post.userId).child("fcmToken").get()
+                                    .addOnSuccessListener { tokenSnapshot ->
+                                        val token = tokenSnapshot.getValue(String::class.java)
+                                        if (token != null && post.userId != uid) {
+                                            sendNotification(token, "New Like!", "$username liked your photo")
+                                        }
+                                    }
                             }
                     }
                 }
@@ -110,6 +115,7 @@ class PostAdapter(private val posts: List<Post>) :
                 pendingLikes.remove(postKey)
             }
         }
+
         holder.tvComments.setOnClickListener {
             val context = holder.itemView.context
             val intent = Intent(context, CommentsActivity::class.java)

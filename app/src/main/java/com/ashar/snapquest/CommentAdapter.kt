@@ -41,12 +41,12 @@ class CommentAdapter(private val comments: List<Comment>) :
                 .child(comment.userId).child("profilePicture").get()
                 .addOnSuccessListener { snapshot ->
                     val url = snapshot.getValue(String::class.java)
-                    if (url != null) {
-                        Glide.with(holder.itemView.context)
-                            .load(url)
-                            .circleCrop()
-                            .into(holder.ivCommentProfilePic)
-                    }
+                    Glide.with(holder.itemView.context)
+                        .load(url)
+                        .placeholder(R.drawable.default_avatar)
+                        .error(R.drawable.default_avatar)
+                        .circleCrop()
+                        .into(holder.ivCommentProfilePic)
                 }
         }
     }
