@@ -65,6 +65,14 @@ reference for code review, interviews, or picking the project back up.
   cross-user writes to another user's profile, impersonated likes/comments,
   and negative-count writes are all correctly denied; owner writes,
   per-user like toggles, and new comments are correctly allowed.
+- **Read access is collection-wide.** `SearchActivity` downloads the entire
+  `users/` node and filters client-side, and the feed listens at `/posts`,
+  so the rules must grant read on both whole collections to any signed-in
+  user. That means any authenticated account can enumerate every user record
+  — including `email` and `fcmToken` — and every post. Narrowing this is not
+  a rules change but a query change: server-side search (or a separate
+  public-profile node holding only username and photo) would let the rules
+  keep emails and tokens private.
 - **Not addressed:** there are no Firebase **Storage** security rules in the
   repo, so uploads to the Storage bucket (`posts/`, `profiles/`) are
   unprotected unless the console has rules the repo doesn't reflect.

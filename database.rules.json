@@ -4,16 +4,18 @@
     ".write": false,
 
     "users": {
+      ".read": "auth != null",
+
       "$uid": {
-        ".read": "auth != null",
         ".write": "auth != null && auth.uid === $uid"
       }
     },
 
     "posts": {
+      ".read": "auth != null",
+
       "$uid": {
         "$date": {
-          ".read": "auth != null",
           ".write": "auth != null && auth.uid === $uid",
 
           "likedBy": {
