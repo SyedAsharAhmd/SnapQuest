@@ -13,6 +13,20 @@ choose one photo, once a day, and so does everyone else. The daily limit
 shapes the whole data model — posts are keyed by date, so "has this user
 posted today" is a single O(1) lookup rather than a query.
 
+## Screenshots
+
+<p align="center">
+  <img src="screenshots/home.png"     width="19%" alt="Home screen with the daily upload entry point" />
+  <img src="screenshots/feed.png"     width="19%" alt="Feed of posts with likes and comments" />
+  <img src="screenshots/profile.png"  width="19%" alt="Profile with the photo grid" />
+  <img src="screenshots/search.png"   width="19%" alt="User search results" />
+  <img src="screenshots/comments.png" width="19%" alt="Comment thread on a post" />
+</p>
+
+<p align="center">
+  <em>Home &middot; Feed &middot; Profile &middot; Search &middot; Comments</em>
+</p>
+
 ## Features
 
 - **Daily upload limit** — one post per user per calendar day, checked
