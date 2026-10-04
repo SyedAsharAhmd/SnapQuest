@@ -1,5 +1,6 @@
 package com.ashar.snapquest
 
+import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,6 +24,7 @@ class CommentAdapter(private val comments: List<Comment>) :
         val tvCommentUsername: TextView = itemView.findViewById(R.id.tvCommentUsername)
         val tvCommentText: TextView = itemView.findViewById(R.id.tvCommentText)
         val ivCommentProfilePic: ImageView = itemView.findViewById(R.id.ivCommentProfilePic)
+        val tvCommentTime: TextView = itemView.findViewById(R.id.tvCommentTime)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CommentViewHolder {
@@ -35,6 +37,8 @@ class CommentAdapter(private val comments: List<Comment>) :
         val comment = comments[position]
         holder.tvCommentUsername.text = "@${comment.username}"
         holder.tvCommentText.text = comment.text
+        holder.tvCommentTime.text = if (comment.timestamp > 0)
+            DateUtils.getRelativeTimeSpanString(comment.timestamp) else ""
 
         if (comment.userId.isNotEmpty()) {
             FirebaseDatabase.getInstance().getReference("users")
