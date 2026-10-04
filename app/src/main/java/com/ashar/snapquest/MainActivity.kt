@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity() {
 
         btnGoogle.setOnClickListener {
             val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken("921166204219-fe4sbvaa2opakvknugcqagcovl9p1bjc.apps.googleusercontent.com")
+                .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build()
             val client = GoogleSignIn.getClient(this, gso)

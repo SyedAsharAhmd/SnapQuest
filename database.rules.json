@@ -1,0 +1,50 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "users": {
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+
+    "posts": {
+      "$uid": {
+        "$date": {
+          ".read": "auth != null",
+          ".write": "auth != null && auth.uid === $uid",
+
+          "likedBy": {
+            "$likerUid": {
+              ".write": "auth != null && auth.uid === $likerUid"
+            }
+          },
+
+          "likes": {
+            ".write": "auth != null",
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          },
+
+          "comments": {
+            "$commentId": {
+              ".write": "auth != null && !data.exists()",
+              ".validate": "newData.hasChildren(['username', 'text', 'timestamp', 'userId']) && newData.child('userId').val() === auth.uid"
+            }
+          },
+
+          "commentCount": {
+            ".write": "auth != null",
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          }
+        }
+      }
+    },
+
+    "notifications": {
+      ".read": false,
+      ".write": "auth != null"
+    }
+  }
+}
