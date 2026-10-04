@@ -11,6 +11,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.MutableData
+import com.google.firebase.database.Transaction
 import com.google.firebase.database.ValueEventListener
 
 class CommentsActivity : AppCompatActivity() {
@@ -90,10 +92,22 @@ class CommentsActivity : AppCompatActivity() {
                     etComment.text.clear()
                     val countRef = FirebaseDatabase.getInstance().getReference("posts")
                         .child(postUserId).child(postDate).child("commentCount")
-                    countRef.get().addOnSuccessListener { countSnapshot ->
-                        val current = countSnapshot.getValue(Int::class.java) ?: 0
-                        countRef.setValue(current + 1)
-                    }
+
+                    // Atomic increment so two simultaneous comments can't overwrite each other's count.
+                    countRef.runTransaction(object : Transaction.Handler {
+                        override fun doTransaction(currentData: MutableData): Transaction.Result {
+                            val current = currentData.getValue(Int::class.java) ?: 0
+                            currentData.value = current + 1
+                            return Transaction.success(currentData)
+                        }
+
+                        override fun onComplete(
+                            error: DatabaseError?,
+                            committed: Boolean,
+                            currentState: DataSnapshot?
+                        ) {
+                        }
+                    })
                 }
             }
     }

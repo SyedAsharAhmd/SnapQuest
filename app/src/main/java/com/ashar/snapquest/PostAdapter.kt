@@ -9,7 +9,11 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.MutableData
+import com.google.firebase.database.Transaction
 
 class PostAdapter(private val posts: List<Post>) :
     RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
@@ -76,41 +80,46 @@ class PostAdapter(private val posts: List<Post>) :
                 .child(post.userId).child(post.date).child("likes")
 
             likesRef.get().addOnSuccessListener { snapshot ->
-                if (snapshot.exists()) {
-                    likesRef.removeValue()
-                    countRef.get().addOnSuccessListener { countSnapshot ->
-                        val currentLikes = countSnapshot.getValue(Int::class.java) ?: 0
-                        val newLikes = if (currentLikes > 0) currentLikes - 1 else 0
-                        countRef.setValue(newLikes)
-                        post.likes = newLikes
-                        holder.tvLikes.text = "♡ $newLikes"
-                        pendingLikes.remove(postKey)
-                    }
-                } else {
-                    likesRef.setValue(true)
-                    countRef.get().addOnSuccessListener { countSnapshot ->
-                        val currentLikes = countSnapshot.getValue(Int::class.java) ?: 0
-                        val newLikes = currentLikes + 1
-                        countRef.setValue(newLikes)
-                        post.likes = newLikes
-                        holder.tvLikes.text = "♡ $newLikes"
-                        pendingLikes.remove(postKey)
+                val isLiking = !snapshot.exists()
+                if (isLiking) likesRef.setValue(true) else likesRef.removeValue()
 
-                        FirebaseDatabase.getInstance().getReference("users")
-                            .child(uid).child("username").get()
-                            .addOnSuccessListener { usernameSnapshot ->
-                                val username = usernameSnapshot.getValue(String::class.java) ?: "Someone"
-                                FirebaseDatabase.getInstance().getReference("users")
-                                    .child(post.userId).child("fcmToken").get()
-                                    .addOnSuccessListener { tokenSnapshot ->
-                                        val token = tokenSnapshot.getValue(String::class.java)
-                                        if (token != null && post.userId != uid) {
-                                            sendNotification(token, "New Like!", "$username liked your photo")
-                                        }
-                                    }
-                            }
+                // Atomic increment/decrement so two simultaneous likes can't clobber each other.
+                countRef.runTransaction(object : Transaction.Handler {
+                    override fun doTransaction(currentData: MutableData): Transaction.Result {
+                        val current = currentData.getValue(Int::class.java) ?: 0
+                        currentData.value = if (isLiking) current + 1 else maxOf(0, current - 1)
+                        return Transaction.success(currentData)
                     }
-                }
+
+                    override fun onComplete(
+                        error: DatabaseError?,
+                        committed: Boolean,
+                        currentState: DataSnapshot?
+                    ) {
+                        pendingLikes.remove(postKey)
+                        if (!committed) return
+
+                        val newLikes = currentState?.getValue(Int::class.java) ?: 0
+                        post.likes = newLikes
+                        holder.tvLikes.text = "♡ $newLikes"
+
+                        if (isLiking) {
+                            FirebaseDatabase.getInstance().getReference("users")
+                                .child(uid).child("username").get()
+                                .addOnSuccessListener { usernameSnapshot ->
+                                    val username = usernameSnapshot.getValue(String::class.java) ?: "Someone"
+                                    FirebaseDatabase.getInstance().getReference("users")
+                                        .child(post.userId).child("fcmToken").get()
+                                        .addOnSuccessListener { tokenSnapshot ->
+                                            val token = tokenSnapshot.getValue(String::class.java)
+                                            if (token != null && post.userId != uid) {
+                                                sendNotification(token, "New Like!", "$username liked your photo")
+                                            }
+                                        }
+                                }
+                        }
+                    }
+                })
             }.addOnFailureListener {
                 pendingLikes.remove(postKey)
             }
