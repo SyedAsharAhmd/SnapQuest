@@ -13,6 +13,25 @@ choose one photo, once a day, and so does everyone else. The daily limit
 shapes the whole data model — posts are keyed by date, so "has this user
 posted today" is a single O(1) lookup rather than a query.
 
+## Screenshots
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/trending.png" width="200" alt="Trending screen: today's posts ranked by likes"><br><sub>Trending</sub></td>
+    <td align="center"><img src="docs/screenshots/feed.png" width="200" alt="Feed screen listing posts with likes and comment counts"><br><sub>Feed</sub></td>
+    <td align="center"><img src="docs/screenshots/comments.png" width="200" alt="Comment thread on a post"><br><sub>Comments</sub></td>
+    <td align="center"><img src="docs/screenshots/profile.png" width="200" alt="Profile with avatar and a 3-column photo grid"><br><sub>Profile</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/upload.png" width="200" alt="New post screen with photo preview and caption"><br><sub>Upload</sub></td>
+    <td align="center"><img src="docs/screenshots/home.png" width="200" alt="Home screen navigation menu"><br><sub>Home</sub></td>
+    <td align="center"><img src="docs/screenshots/search.png" width="200" alt="User search results"><br><sub>Search</sub></td>
+    <td align="center"><img src="docs/screenshots/login.png" width="200" alt="Login screen with email and Google sign-in"><br><sub>Login</sub></td>
+  </tr>
+</table>
+
+<sub>Captured from the app running against the local Firebase emulators, with demo accounts and generated images.</sub>
+
 ## Features
 
 - **Daily upload limit** — one post per user per calendar day, checked
@@ -25,6 +44,49 @@ posted today" is a single O(1) lookup rather than a query.
 - **Push notifications** when someone likes or comments on your photo,
   delivered by Cloud Functions reacting to database writes
 - **Daily reminder** at 20:00 via WorkManager if you haven't posted yet
+
+## Architecture
+
+```mermaid
+flowchart LR
+    App["Android app<br/>(Kotlin, 9 Activities)"]
+    Auth["Firebase Auth"]
+    RTDB[("Realtime Database<br/>users/ · posts/")]
+    Storage[("Firebase Storage<br/>photos")]
+    Fn["Cloud Functions<br/>notifyOnLike · notifyOnComment"]
+    FCM["Cloud Messaging"]
+
+    App -- sign in --> Auth
+    App -- read / write --> RTDB
+    App -- upload images --> Storage
+    RTDB -- write triggers --> Fn
+    Fn -- push --> FCM
+    FCM -- notification --> App
+```
+
+The client talks to Firebase directly; the only server-side code is the two
+notification triggers, which react to database writes so that sending a
+push is a side effect of liking or commenting rather than a separate client
+call.
+
+## Engineering notes
+
+A few decisions worth calling out:
+
+- **Date-keyed posts.** `posts/{uid}/{YYYY-MM-DD}` turns "has this user
+  posted today?" into a single path lookup, and the Storage path
+  (`posts/{uid}/{date}.jpg`) mirrors it, so each day maps to exactly one
+  image.
+- **Atomic counters.** Likes and comment counts are updated with
+  `runTransaction` rather than read-then-write, so two people liking at the
+  same moment don't lose an increment.
+- **Security rules tested against the emulator.** `database.rules.json` was
+  checked with the Firebase Database Emulator for both the denied cases
+  (unauthenticated access, editing another user's profile, impersonated
+  likes/comments) and the exact paths each screen reads and writes, then
+  verified end to end on a device against the deployed rules.
+- **Documented tradeoffs.** What wasn't done, and why, is written down in
+  [`LIMITATIONS.md`](LIMITATIONS.md) rather than left implicit.
 
 ## Tech stack
 
@@ -98,9 +160,30 @@ to send notifications itself:
 - `notifyOnLike` — fires on a new `likedBy/{uid}` entry
 - `notifyOnComment` — fires on a new comment
 
+## Project structure
+
+```
+app/src/main/java/com/ashar/snapquest/
+  *Activity.kt              one per screen (see table above)
+  PostAdapter.kt            feed/trending rows — likes, comment button
+  CommentAdapter.kt         comment rows
+  GalleryAdapter.kt         profile photo grid
+  SearchAdapter.kt          search results
+  MyFirebaseMessagingService.kt   receives pushes, stores the FCM token
+  ReminderWorker.kt         20:00 "you haven't posted" reminder
+functions/index.js          Cloud Functions (push notifications)
+database.rules.json         Realtime Database security rules
+LIMITATIONS.md              known tradeoffs and next steps
+```
+
 ## Running it
 
-You'll need Android Studio, JDK 11+, and a Firebase project of your own.
+You'll need:
+
+- Android Studio and JDK 11+
+- A Firebase project of your own
+- The [Firebase CLI](https://firebase.google.com/docs/cli) and Node.js 24
+  (only for deploying rules and functions)
 
 1. **Clone**
 
@@ -114,23 +197,42 @@ You'll need Android Studio, JDK 11+, and a Firebase project of your own.
    - Storage
    - Cloud Messaging
 
-3. **Add your config.** Download your own `google-services.json` from the
-   Firebase console and replace `app/google-services.json`. The committed
-   one points at the original project, whose rules will reject your writes.
+   Cloud Functions need the project on the Blaze (pay-as-you-go) plan. The
+   app runs without them; you just won't get like/comment notifications.
 
-4. **Deploy the security rules and functions**
+3. **Register the app's SHA-1** (needed for Google Sign-In). Get your debug
+   key's fingerprint and add it under Project settings → Your apps:
 
    ```bash
+   ./gradlew signingReport
+   ```
+
+4. **Add your config.** Download `google-services.json` from the Firebase
+   console *after* enabling Google sign-in and adding the SHA-1, and replace
+   `app/google-services.json`. The committed one points at the original
+   project, whose rules will reject your writes.
+
+5. **Point the CLI at your project and deploy the rules and functions**
+
+   ```bash
+   firebase use --add            # select your project
    firebase deploy --only database
    cd functions && npm install && cd ..
    firebase deploy --only functions
    ```
 
-5. **Build and run** from Android Studio, or:
+   The repo has no Storage rules (see [`LIMITATIONS.md`](LIMITATIONS.md)),
+   so set them in the console before using a project anyone else can reach.
+
+6. **Build and run** from Android Studio, or:
 
    ```bash
    ./gradlew assembleDebug
    ```
+
+On Android 13+ the app doesn't yet request the notification permission at
+runtime, so to see push notifications and the daily reminder, enable
+notifications for SnapQuest in system settings.
 
 `local.properties` (containing your Android SDK path) is generated by
 Android Studio on first open and is intentionally not committed.
